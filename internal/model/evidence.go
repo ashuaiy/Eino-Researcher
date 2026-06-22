@@ -4,6 +4,7 @@ import "time"
 
 type Evidence struct {
 	ID          string    `json:"id,omitempty"`
+	DocumentID  string    `json:"document_id,omitempty"`
 	TaskID      string    `json:"task_id,omitempty"`
 	SubQuestion string    `json:"sub_question"`
 	SourceType  string    `json:"source_type"`

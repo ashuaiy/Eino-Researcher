@@ -1,10 +1,13 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
+	"eino-researcher/internal/llm"
 	"eino-researcher/internal/rag"
 )
 
@@ -28,6 +31,11 @@ func (h *RAGHandler) Query(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	req.Question = strings.TrimSpace(req.Question)
+	if req.Question == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "question is required"})
+		return
+	}
 	if req.TopK <= 0 {
 		req.TopK = 5
 	}
@@ -38,6 +46,10 @@ func (h *RAGHandler) Query(c *gin.Context) {
 		Stream:   req.Stream,
 	})
 	if err != nil {
+		if errors.Is(err, llm.ErrProvider) {
+			c.JSON(http.StatusBadGateway, gin.H{"error": "model provider request failed"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to query rag service"})
 		return
 	}

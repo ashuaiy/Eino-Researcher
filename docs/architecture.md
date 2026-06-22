@@ -33,23 +33,23 @@ PostgreSQL + pgvector         |
 Streaming Response / Markdown Report
 ```
 
-## Current Skeleton
+## Current Implementation
 
 - `cmd/server`: application entrypoint.
 - `internal/api`: Gin router, middleware, and handlers.
 - `internal/config`: environment-based configuration.
-- `internal/llm`: OpenAI-compatible chat and embedding interfaces.
-- `internal/rag`: chunking, retrieval, indexing, and generation interfaces.
+- `internal/llm`: real OpenAI-compatible chat and embedding HTTP clients.
+- `internal/rag`: fixed-size chunking, transactional indexing, pgvector retrieval, and grounded generation.
 - `internal/agent`: Deep Research Agent workflow interfaces.
 - `internal/tools`: local retrieval, web search, and document reader tool boundaries.
-- `internal/store`: PostgreSQL repository boundaries plus in-memory placeholders.
+- `internal/store`: pgx-based PostgreSQL repositories and transactional document/chunk persistence.
 - `internal/queue`: Redis queue and worker boundaries.
 - `migrations`: PostgreSQL + pgvector schema.
 
 ## Next Integration Points
 
-1. Replace LLM stubs with Eino ChatModel and embedding components.
-2. Replace in-memory repositories with PostgreSQL repositories.
-3. Implement pgvector TopK search.
+1. Add document update/delete and index rebuild workflows.
+2. Add retrieval evaluation, hybrid search, and reranking.
+3. Replace direct model clients with Eino components where orchestration benefits from it.
 4. Add Redis-backed queue and worker lifecycle.
 5. Back `/stream` with real task events and report deltas.

@@ -3,9 +3,7 @@ package rag
 import (
 	"context"
 
-	"eino-researcher/internal/llm"
 	"eino-researcher/internal/model"
-	"eino-researcher/internal/store"
 )
 
 type Service interface {
@@ -24,23 +22,27 @@ type QueryResponse struct {
 }
 
 type BasicService struct {
-	documents store.DocumentRepository
-	embedder  llm.Embedder
 	generator Generator
 	retriever Retriever
 }
 
-func NewService(documents store.DocumentRepository, embedder llm.Embedder, chat llm.ChatClient) *BasicService {
+func NewService(retriever Retriever, generator Generator) *BasicService {
 	return &BasicService{
-		documents: documents,
-		embedder:  embedder,
-		generator: NewLLMGenerator(chat),
-		retriever: EmptyRetriever{},
+		generator: generator,
+		retriever: retriever,
 	}
 }
 
 func (s *BasicService) Query(ctx context.Context, req QueryRequest) (QueryResponse, error) {
-	evidences, err := s.retriever.Search(ctx, req.Question, req.TopK)
+	topK := req.TopK
+	if topK <= 0 {
+		topK = 5
+	}
+	if topK > 20 {
+		topK = 20
+	}
+
+	evidences, err := s.retriever.Search(ctx, req.Question, topK)
 	if err != nil {
 		return QueryResponse{}, err
 	}

@@ -15,14 +15,14 @@ import (
 func TestHealthReturnsOK(t *testing.T) {
 	documents := store.NewInMemoryDocumentRepository()
 	ragService := rag.NewService(
-		documents,
-		llm.NewOpenAICompatibleEmbedder(config.EmbeddingConfig{}),
-		llm.NewOpenAICompatibleClient(config.LLMConfig{}),
+		rag.EmptyRetriever{},
+		rag.NewLLMGenerator(llm.NewOpenAICompatibleClient(config.LLMConfig{})),
 	)
 
 	router := NewRouter(Dependencies{
 		Config:       config.Load(),
 		Documents:    documents,
+		Indexer:      rag.NoopIndexer{},
 		RAG:          ragService,
 		Orchestrator: agent.NewOrchestrator(agent.OrchestratorConfig{RAG: ragService}),
 	})

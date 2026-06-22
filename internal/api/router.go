@@ -15,6 +15,7 @@ import (
 type Dependencies struct {
 	Config       config.Config
 	Documents    store.DocumentRepository
+	Indexer      rag.Indexer
 	RAG          rag.Service
 	Orchestrator agent.Orchestrator
 }
@@ -30,7 +31,7 @@ func NewRouter(deps Dependencies) *gin.Engine {
 
 	v1 := router.Group("/api/v1")
 	{
-		documentHandler := handlers.NewDocumentHandler(deps.Documents)
+		documentHandler := handlers.NewDocumentHandler(deps.Indexer, deps.Config.App.MaxUploadBytes)
 		ragHandler := handlers.NewRAGHandler(deps.RAG)
 		researchHandler := handlers.NewResearchHandler(deps.Orchestrator)
 
